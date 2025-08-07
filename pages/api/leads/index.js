@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../auth/[...nextauth]'
-import { prisma } from '../../../lib/prisma'
+import { storage } from '../../../lib/storage'
 import { scoreLead } from '../../../lib/ai'
 
 export default async function handler(req, res) {
@@ -24,35 +24,24 @@ async function getLeads(req, res, session) {
   try {
     const { page = 1, limit = 10, status, priority, source } = req.query
     
-    const where = {
-      assignedTo: session.user.id
-    }
+    let leads = storage.getLeads({ assignedTo: session.user.id })
 
-    if (status) where.status = status
-    if (priority) where.priority = priority
-    if (source) where.source = source
+    // Apply filters
+    if (status) leads = leads.filter(lead => lead.status === status)
+    if (priority) leads = leads.filter(lead => lead.priority === priority)
+    if (source) leads = leads.filter(lead => lead.source === source)
 
-    const leads = await prisma.lead.findMany({
-      where,
-      include: {
-        conversations: {
-          orderBy: { createdAt: 'desc' },
-          take: 1
-        },
-        tasks: {
-          where: { status: 'PENDING' },
-          orderBy: { dueDate: 'asc' }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: parseInt(limit)
-    })
+    // Sort by creation date
+    leads = leads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
-    const total = await prisma.lead.count({ where })
+    // Pagination
+    const total = leads.length
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + parseInt(limit)
+    const paginatedLeads = leads.slice(startIndex, endIndex)
 
     res.status(200).json({
-      leads,
+      leads: paginatedLeads,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -76,9 +65,8 @@ async function createLead(req, res, session) {
     }
 
     // Check if lead already exists
-    const existingLead = await prisma.lead.findFirst({
-      where: { email, assignedTo: session.user.id }
-    })
+    const existingLeads = storage.getLeads({ assignedTo: session.user.id })
+    const existingLead = existingLeads.find(lead => lead.email === email)
 
     if (existingLead) {
       return res.status(400).json({ error: 'Lead with this email already exists' })
@@ -88,31 +76,27 @@ async function createLead(req, res, session) {
     const leadData = { firstName, lastName, email, phone, company, position, source }
     const scoring = await scoreLead(leadData)
 
-    const lead = await prisma.lead.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        company,
-        position,
-        source: source || 'OTHER',
-        notes,
-        priority: scoring.priority,
-        assignedTo: session.user.id
-      }
+    const lead = storage.createLead({
+      firstName,
+      lastName,
+      email,
+      phone,
+      company,
+      position,
+      source: source || 'OTHER',
+      notes,
+      priority: scoring.priority,
+      assignedTo: session.user.id
     })
 
     // Create initial task for follow-up
-    await prisma.task.create({
-      data: {
-        title: `Follow up with ${firstName} ${lastName}`,
-        type: 'FOLLOW_UP',
-        priority: scoring.priority,
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-        assignedTo: session.user.id,
-        leadId: lead.id
-      }
+    storage.createTask({
+      title: `Follow up with ${firstName} ${lastName}`,
+      type: 'FOLLOW_UP',
+      priority: scoring.priority,
+      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      assignedTo: session.user.id,
+      leadId: lead.id
     })
 
     res.status(201).json({ 
