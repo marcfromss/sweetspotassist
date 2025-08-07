@@ -1,7 +1,6 @@
 {
   "name": "sweetspot-assist",
   "version": "1.0.0",
-  "description": "AI-powered Smart CRM for Insurance Sales Agents",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,10 +11,6 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@nextui-org/react": "2.2.9",
-    "framer-motion": "10.16.4",
-    "openai": "^4.20.1",
-    "@anthropic-ai/sdk": "^0.9.1",
     "next-auth": "^4.24.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
@@ -47,8 +42,5 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/uuid": "^9.0.7"
-  },
-  "resolutions": {
-    "framer-motion": "10.16.4"
   }
 }
