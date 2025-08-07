@@ -2,18 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Button, 
-  Chip,
-  Progress,
-  Avatar,
-  Badge,
-  Divider,
-  Spinner
-} from '@nextui-org/react'
-import { 
   Users, 
   DollarSign, 
   Calendar, 
@@ -91,7 +79,7 @@ export default function Dashboard() {
   if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
@@ -99,15 +87,13 @@ export default function Dashboard() {
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-96">
-          <CardBody className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Welcome to Sweetspot Assist</h1>
-            <p className="text-gray-600 mb-6">Please sign in to access your CRM dashboard</p>
-            <Button color="primary" size="lg">
-              Sign In
-            </Button>
-          </CardBody>
-        </Card>
+        <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+          <h1 className="text-2xl font-bold mb-4 text-center">Welcome to Sweetspot Assist</h1>
+          <p className="text-gray-600 mb-6 text-center">Please sign in to access your CRM dashboard</p>
+          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+            Sign In
+          </button>
+        </div>
       </div>
     )
   }
@@ -127,10 +113,15 @@ export default function Dashboard() {
               <p className="text-gray-600">Welcome back, {session.user?.name}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button color="primary" startContent={<Plus size={16} />}>
+              <button className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded">
+                <Plus size={16} className="mr-2" />
                 New Lead
-              </Button>
-              <Avatar name={session.user?.name} size="sm" />
+              </button>
+              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-600">
+                  {session.user?.name?.[0]}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -139,8 +130,8 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardBody className="flex flex-row items-center justify-between">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Leads</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalLeads}</p>
@@ -149,11 +140,11 @@ export default function Dashboard() {
               <div className="p-3 bg-blue-100 rounded-full">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardBody className="flex flex-row items-center justify-between">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Clients</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.activeClients}</p>
@@ -162,11 +153,11 @@ export default function Dashboard() {
               <div className="p-3 bg-green-100 rounded-full">
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardBody className="flex flex-row items-center justify-between">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Commissions</p>
                 <p className="text-2xl font-bold text-gray-900">${stats.pendingCommissions.toLocaleString()}</p>
@@ -175,11 +166,11 @@ export default function Dashboard() {
               <div className="p-3 bg-orange-100 rounded-full">
                 <DollarSign className="h-6 w-6 text-orange-600" />
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardBody className="flex flex-row items-center justify-between">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
                 <p className="text-2xl font-bold text-gray-900">${stats.monthlyRevenue.toLocaleString()}</p>
@@ -188,108 +179,102 @@ export default function Dashboard() {
               <div className="p-3 bg-purple-100 rounded-full">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Leads */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Recent Leads</h3>
-              <Button size="sm" variant="light">View All</Button>
-            </CardHeader>
-            <CardBody>
+          <div className="lg:col-span-2 bg-white rounded-lg shadow">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Recent Leads</h3>
+                <button className="text-sm text-blue-500 hover:text-blue-600">View All</button>
+              </div>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 {recentLeads.map((lead) => (
                   <div key={lead.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <Avatar name={lead.name} size="sm" />
+                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                        <span className="text-sm font-medium text-gray-600">
+                          {lead.name[0]}
+                        </span>
+                      </div>
                       <div>
                         <p className="font-medium">{lead.name}</p>
                         <p className="text-sm text-gray-600">{lead.company}</p>
                       </div>
                     </div>
-                                         <div className="flex items-center space-x-2">
-                       <Button
-                         size="sm"
-                         color="primary"
-                         variant="bordered"
-                         startContent={<Phone size={16} />}
-                         isDisabled
-                       >
-                         Call (Coming Soon)
-                       </Button>
-                       <Chip 
-                         size="sm" 
-                         color={lead.priority === 'URGENT' ? 'danger' : lead.priority === 'HIGH' ? 'warning' : 'default'}
-                       >
-                         {lead.priority}
-                       </Chip>
-                       <Chip size="sm" variant="bordered">
-                         {lead.status}
-                       </Chip>
-                     </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        className="inline-flex items-center px-3 py-1 border border-blue-500 text-blue-500 rounded text-sm disabled:opacity-50"
+                        disabled
+                      >
+                        <Phone size={16} className="mr-1" />
+                        Call (Coming Soon)
+                      </button>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        lead.priority === 'URGENT' ? 'bg-red-100 text-red-600' :
+                        lead.priority === 'HIGH' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {lead.priority}
+                      </span>
+                      <span className="px-2 py-1 text-xs rounded border text-gray-600">
+                        {lead.status}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
           {/* Quick Actions */}
-          <Card>
-            <CardHeader>
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6 border-b">
               <h3 className="text-lg font-semibold">Quick Actions</h3>
-            </CardHeader>
-            <CardBody>
+            </div>
+            <div className="p-6">
               <div className="space-y-3">
-                <Button 
-                  fullWidth 
-                  color="primary" 
-                  startContent={<Plus size={16} />}
-                  variant="flat"
-                >
+                <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded">
+                  <Plus size={16} className="mr-2" />
                   Add New Lead
-                </Button>
-                <Button 
-                  fullWidth 
-                  color="secondary" 
-                  startContent={<Calendar size={16} />}
-                  variant="flat"
-                >
+                </button>
+                <button className="w-full flex items-center justify-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded">
+                  <Calendar size={16} className="mr-2" />
                   Schedule Meeting
-                </Button>
-                <Button 
-                  fullWidth 
-                  color="success" 
-                  startContent={<FileText size={16} />}
-                  variant="flat"
-                >
+                </button>
+                <button className="w-full flex items-center justify-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded">
+                  <FileText size={16} className="mr-2" />
                   Upload Document
-                </Button>
-                <Button 
-                  fullWidth 
-                  color="warning" 
-                  startContent={<Mail size={16} />}
-                  variant="flat"
-                >
+                </button>
+                <button className="w-full flex items-center justify-center px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded">
+                  <Mail size={16} className="mr-2" />
                   Send Follow-up
-                </Button>
+                </button>
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           {/* Upcoming Tasks */}
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Upcoming Tasks</h3>
-              <Badge content={stats.tasksDue} color="danger">
-                <Button size="sm" variant="light">View All</Button>
-              </Badge>
-            </CardHeader>
-            <CardBody>
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Upcoming Tasks</h3>
+                <div className="relative">
+                  <button className="text-sm text-blue-500 hover:text-blue-600">View All</button>
+                  <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full">
+                    {stats.tasksDue}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 {upcomingTasks.map((task) => (
                   <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -308,27 +293,33 @@ export default function Dashboard() {
                         <p className="text-sm text-gray-600">Due: {task.dueDate}</p>
                       </div>
                     </div>
-                    <Chip 
-                      size="sm" 
-                      color={task.priority === 'URGENT' ? 'danger' : task.priority === 'HIGH' ? 'warning' : 'default'}
-                    >
+                    <span className={`px-2 py-1 text-xs rounded ${
+                      task.priority === 'URGENT' ? 'bg-red-100 text-red-600' :
+                      task.priority === 'HIGH' ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
                       {task.priority}
-                    </Chip>
+                    </span>
                   </div>
                 ))}
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
 
           {/* Commission Alerts */}
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Commission Alerts</h3>
-              <Badge content={stats.urgentAlerts} color="danger">
-                <AlertCircle className="h-5 w-5 text-red-500" />
-              </Badge>
-            </CardHeader>
-            <CardBody>
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Commission Alerts</h3>
+                <div className="relative">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full">
+                    {stats.urgentAlerts}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 {commissionAlerts.map((alert) => (
                   <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -338,58 +329,59 @@ export default function Dashboard() {
                       {alert.reason && <p className="text-xs text-red-600">{alert.reason}</p>}
                     </div>
                     <div className="text-right">
-                      <Chip 
-                        size="sm" 
-                        color={alert.status === 'OVERDUE' ? 'danger' : alert.status === 'DUE_SOON' ? 'warning' : 'default'}
-                      >
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        alert.status === 'OVERDUE' ? 'bg-red-100 text-red-600' :
+                        alert.status === 'DUE_SOON' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
                         {alert.status === 'OVERDUE' ? `${alert.daysLate}d late` :
                          alert.status === 'DUE_SOON' ? `${alert.daysLeft}d left` : alert.status}
-                      </Chip>
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Performance Chart */}
-        <Card className="mt-8">
-          <CardHeader>
+        <div className="bg-white rounded-lg shadow mt-8">
+          <div className="p-6 border-b">
             <h3 className="text-lg font-semibold">Performance Overview</h3>
-          </CardHeader>
-          <CardBody>
+          </div>
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-2">Lead Conversion Rate</p>
-                <Progress 
-                  value={68} 
-                  color="success" 
-                  className="mb-2"
-                />
+                <div className="relative pt-1">
+                  <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-green-100">
+                    <div style={{ width: "68%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+                  </div>
+                </div>
                 <p className="text-xs text-gray-500">68% - Above target</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-2">Commission Collection</p>
-                <Progress 
-                  value={85} 
-                  color="primary" 
-                  className="mb-2"
-                />
+                <div className="relative pt-1">
+                  <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-blue-100">
+                    <div style={{ width: "85%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+                  </div>
+                </div>
                 <p className="text-xs text-gray-500">85% - On track</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-2">Client Retention</p>
-                <Progress 
-                  value={92} 
-                  color="secondary" 
-                  className="mb-2"
-                />
+                <div className="relative pt-1">
+                  <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-purple-100">
+                    <div style={{ width: "92%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500"></div>
+                  </div>
+                </div>
                 <p className="text-xs text-gray-500">92% - Excellent</p>
               </div>
             </div>
-          </CardBody>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
