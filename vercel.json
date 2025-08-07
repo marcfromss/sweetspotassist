@@ -1,17 +1,6 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "functions": {
-    "pages/api/**/*.js": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "NEXTAUTH_URL": "@nextauth_url",
     "NEXTAUTH_SECRET": "@nextauth_secret"
