@@ -1,0 +1,366 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(AGENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  leads     Lead[]
+  clients   Client[]
+  tasks     Task[]
+  commissions Commission[]
+  documents Document[]
+  conversations Conversation[]
+  reminders Reminder[]
+  campaigns Campaign[]
+
+  @@map("users")
+}
+
+model Lead {
+  id          String      @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  company     String?
+  position    String?
+  source      LeadSource
+  status      LeadStatus  @default(NEW)
+  priority    Priority    @default(MEDIUM)
+  tags        String?     // JSON array of tags
+  notes       String?
+  assignedTo  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [assignedTo], references: [id])
+  conversations Conversation[]
+  tasks       Task[]
+  documents   Document[]
+
+  @@map("leads")
+}
+
+model Client {
+  id          String      @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  address     String?
+  dateOfBirth DateTime?
+  ssn         String?     // Encrypted
+  assignedTo  String?
+  status      ClientStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [assignedTo], references: [id])
+  policies    Policy[]
+  commissions Commission[]
+  tasks       Task[]
+  documents   Document[]
+  conversations Conversation[]
+  reminders   Reminder[]
+
+  @@map("clients")
+}
+
+model Policy {
+  id              String        @id @default(cuid())
+  policyNumber    String        @unique
+  clientId        String
+  provider        String
+  type            PolicyType
+  status          PolicyStatus  @default(ACTIVE)
+  startDate       DateTime
+  endDate         DateTime?
+  premium         Float
+  coverage        String?
+  commissionRate  Float
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  client          Client        @relation(fields: [clientId], references: [id])
+  commissions     Commission[]
+
+  @@map("policies")
+}
+
+model Commission {
+  id          String          @id @default(cuid())
+  policyId    String
+  agentId     String
+  amount      Float
+  status      CommissionStatus @default(PENDING)
+  dueDate     DateTime
+  paidDate    DateTime?
+  chargeback  Boolean         @default(false)
+  chargebackDate DateTime?
+  chargebackReason String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  policy      Policy          @relation(fields: [policyId], references: [id])
+  agent       User            @relation(fields: [agentId], references: [id])
+
+  @@map("commissions")
+}
+
+model Task {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  type        TaskType
+  priority    Priority    @default(MEDIUM)
+  status      TaskStatus  @default(PENDING)
+  dueDate     DateTime
+  completedAt DateTime?
+  assignedTo  String?
+  leadId      String?
+  clientId    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User?       @relation(fields: [assignedTo], references: [id])
+  lead        Lead?       @relation(fields: [leadId], references: [id])
+  client      Client?     @relation(fields: [clientId], references: [id])
+
+  @@map("tasks")
+}
+
+model Document {
+  id          String        @id @default(cuid())
+  name        String
+  type        DocumentType
+  filePath    String
+  fileSize    Int
+  mimeType    String
+  uploadedBy  String
+  leadId      String?
+  clientId    String?
+  ocrText     String?       // Extracted text from OCR
+  signature   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user        User          @relation(fields: [uploadedBy], references: [id])
+  lead        Lead?         @relation(fields: [leadId], references: [id])
+  client      Client?       @relation(fields: [clientId], references: [id])
+
+  @@map("documents")
+}
+
+model Conversation {
+  id          String      @id @default(cuid())
+  type        ConversationType
+  subject     String?
+  content     String
+  direction   MessageDirection
+  leadId      String?
+  clientId    String?
+  agentId     String
+  aiGenerated Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  lead        Lead?       @relation(fields: [leadId], references: [id])
+  client      Client?     @relation(fields: [clientId], references: [id])
+  agent       User        @relation(fields: [agentId], references: [id])
+
+  @@map("conversations")
+}
+
+model Reminder {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  type        ReminderType
+  status      ReminderStatus @default(PENDING)
+  clientId    String?
+  agentId     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  client      Client?     @relation(fields: [clientId], references: [id])
+  agent       User        @relation(fields: [agentId], references: [id])
+
+  @@map("reminders")
+}
+
+model Campaign {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  type        CampaignType
+  status      CampaignStatus @default(DRAFT)
+  template    String        // Email/SMS template
+  schedule    String?       // Cron expression for scheduling
+  agentId     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  agent       User          @relation(fields: [agentId], references: [id])
+
+  @@map("campaigns")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  AGENT
+  MANAGER
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  COLD_CALL
+  SOCIAL_MEDIA
+  ADVERTISING
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum PolicyType {
+  LIFE
+  HEALTH
+  AUTO
+  HOME
+  BUSINESS
+  DISABILITY
+  LONG_TERM_CARE
+  OTHER
+}
+
+enum PolicyStatus {
+  ACTIVE
+  PENDING
+  CANCELLED
+  EXPIRED
+  UNDER_REVIEW
+}
+
+enum CommissionStatus {
+  PENDING
+  PAID
+  CHARGEBACK
+  DISPUTED
+}
+
+enum TaskType {
+  FOLLOW_UP
+  DOCUMENT_COLLECTION
+  POLICY_REVIEW
+  COMMISSION_FOLLOW_UP
+  CLIENT_MEETING
+  TRAINING
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentType {
+  APPLICATION
+  ID_DOCUMENT
+  FINANCIAL_STATEMENT
+  MEDICAL_RECORD
+  POLICY_DOCUMENT
+  COMMISSION_STATEMENT
+  OTHER
+}
+
+enum ConversationType {
+  EMAIL
+  PHONE
+  SMS
+  IN_PERSON
+  VIDEO_CALL
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum ReminderType {
+  POLICY_RENEWAL
+  COMMISSION_FOLLOW_UP
+  DOCUMENT_COLLECTION
+  CLIENT_MEETING
+  TRAINING
+  OTHER
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+  SOCIAL_MEDIA
+  DIRECT_MAIL
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+} 
