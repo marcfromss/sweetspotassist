@@ -28,7 +28,6 @@ import {
   Plus
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import CallButton from '../components/CallButton'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -212,13 +211,15 @@ export default function Dashboard() {
                       </div>
                     </div>
                                          <div className="flex items-center space-x-2">
-                       <CallButton 
-                         contact={lead} 
-                         type="lead"
-                         onCallComplete={(result) => {
-                           toast.success(`Call logged for ${lead.name}`)
-                         }}
-                       />
+                       <Button
+                         size="sm"
+                         color="primary"
+                         variant="bordered"
+                         startContent={<Phone size={16} />}
+                         isDisabled
+                       >
+                         Call (Coming Soon)
+                       </Button>
                        <Chip 
                          size="sm" 
                          color={lead.priority === 'URGENT' ? 'danger' : lead.priority === 'HIGH' ? 'warning' : 'default'}
