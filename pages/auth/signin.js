@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 export default function SignIn() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -15,20 +16,28 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
 
     try {
+      console.log('Attempting sign in with:', formData.email)
+      
       const result = await signIn('credentials', {
         redirect: false,
         email: formData.email,
         password: formData.password
       })
 
+      console.log('Sign in result:', result)
+
       if (result.error) {
+        setError('Invalid email or password')
         toast.error('Invalid credentials')
       } else {
         router.push('/')
       }
     } catch (error) {
+      console.error('Sign in error:', error)
+      setError('An error occurred during sign in')
       toast.error('An error occurred')
     } finally {
       setIsLoading(false)
@@ -58,6 +67,12 @@ export default function SignIn() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address

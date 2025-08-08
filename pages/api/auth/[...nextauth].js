@@ -1,14 +1,13 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
 
 // Demo user for testing
 const demoUser = {
   id: '1',
   email: 'demo@example.com',
   name: 'Demo User',
-  password: bcrypt.hashSync('demo123', 10),
-  role: 'AGENT'
+  // Plain password is 'demo123'
+  hashedPassword: '$2a$10$6KqGK1IhCqYoUZF99qYEYuX6.WkxUX6Y1qLK1cXuXtZsHkZbPXnwK'
 }
 
 export default NextAuth({
@@ -20,27 +19,32 @@ export default NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
         try {
+          console.log('Attempting login with:', credentials?.email)
+
+          if (!credentials?.email || !credentials?.password) {
+            console.log('Missing credentials')
+            return null
+          }
+
           // For demo, only allow the demo user
           if (credentials.email !== demoUser.email) {
+            console.log('Email not found:', credentials.email)
             return null
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, demoUser.password)
-
-          if (!isPasswordValid) {
+          // For demo, just check if password is 'demo123'
+          if (credentials.password !== 'demo123') {
+            console.log('Invalid password')
             return null
           }
+
+          console.log('Login successful for:', demoUser.email)
 
           return {
             id: demoUser.id,
             email: demoUser.email,
-            name: demoUser.name,
-            role: demoUser.role
+            name: demoUser.name
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -49,29 +53,13 @@ export default NextAuth({
       }
     })
   ],
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role
-        token.id = user.id
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.role = token.role
-        session.user.id = token.id
-      }
-      return session
-    }
-  },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    error: '/auth/error'
   },
-  secret: process.env.NEXTAUTH_SECRET
+  debug: true,
+  session: {
+    strategy: 'jwt'
+  },
+  secret: process.env.NEXTAUTH_SECRET || 'your-secret-key-here'
 }) 
