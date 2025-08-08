@@ -1,7 +1,15 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { storage } from '../../../lib/storage'
 import bcrypt from 'bcryptjs'
+
+// Demo user for testing
+const demoUser = {
+  id: '1',
+  email: 'demo@example.com',
+  name: 'Demo User',
+  password: bcrypt.hashSync('demo123', 10),
+  role: 'AGENT'
+}
 
 export default NextAuth({
   providers: [
@@ -17,23 +25,22 @@ export default NextAuth({
         }
 
         try {
-          const user = storage.getUserByEmail(credentials.email)
-
-          if (!user) {
+          // For demo, only allow the demo user
+          if (credentials.email !== demoUser.email) {
             return null
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+          const isPasswordValid = await bcrypt.compare(credentials.password, demoUser.password)
 
           if (!isPasswordValid) {
             return null
           }
 
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
+            id: demoUser.id,
+            email: demoUser.email,
+            name: demoUser.name,
+            role: demoUser.role
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -66,5 +73,5 @@ export default NextAuth({
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET
 }) 

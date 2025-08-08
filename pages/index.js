@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signIn } from 'next-auth/react'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { 
   Users, 
@@ -19,6 +20,7 @@ import toast from 'react-hot-toast'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalLeads: 0,
@@ -31,6 +33,12 @@ export default function Dashboard() {
   const [recentLeads, setRecentLeads] = useState([])
   const [upcomingTasks, setUpcomingTasks] = useState([])
   const [commissionAlerts, setCommissionAlerts] = useState([])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -76,7 +84,8 @@ export default function Dashboard() {
     }
   }
 
-  if (status === 'loading' || loading) {
+  // Show loading spinner while checking auth status
+  if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -84,16 +93,16 @@ export default function Dashboard() {
     )
   }
 
-  if (!session) {
+  // Redirect to sign in if not authenticated
+  if (status === 'unauthenticated') {
+    return null // Router will handle redirect
+  }
+
+  // Show loading spinner while fetching dashboard data
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-          <h1 className="text-2xl font-bold mb-4 text-center">Welcome to Sweetspot Assist</h1>
-          <p className="text-gray-600 mb-6 text-center">Please sign in to access your CRM dashboard</p>
-          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
-            Sign In
-          </button>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
