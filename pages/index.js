@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSession, signIn } from 'next-auth/react'
+import { useSession, signIn, signOut } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { 
@@ -14,7 +14,8 @@ import {
   Phone,
   FileText,
   Settings,
-  Plus
+  Plus,
+  LogOut
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -84,6 +85,30 @@ export default function Dashboard() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: '/auth/signin' })
+  }
+
+  const handleNewLead = () => {
+    toast.success('Coming soon: New Lead form')
+  }
+
+  const handleScheduleMeeting = () => {
+    toast.success('Coming soon: Meeting scheduler')
+  }
+
+  const handleUploadDocument = () => {
+    toast.success('Coming soon: Document uploader')
+  }
+
+  const handleSendFollowUp = () => {
+    toast.success('Coming soon: Follow-up sender')
+  }
+
+  const handleViewAll = (section) => {
+    toast.success(`Coming soon: ${section} view`)
+  }
+
   // Show loading spinner while checking auth status
   if (status === 'loading') {
     return (
@@ -122,14 +147,31 @@ export default function Dashboard() {
               <p className="text-gray-600">Welcome back, {session.user?.name}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded">
+              <button
+                onClick={handleNewLead}
+                className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded"
+              >
                 <Plus size={16} className="mr-2" />
                 New Lead
               </button>
-              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">
-                  {session.user?.name?.[0]}
-                </span>
+              <div className="relative group">
+                <button
+                  onClick={handleSignOut}
+                  className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-600">
+                    {session.user?.name?.[0]}
+                  </span>
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                  <button
+                    onClick={handleSignOut}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    <LogOut size={16} className="inline-block mr-2" />
+                    Sign out
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -198,7 +240,12 @@ export default function Dashboard() {
             <div className="p-6 border-b">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Recent Leads</h3>
-                <button className="text-sm text-blue-500 hover:text-blue-600">View All</button>
+                <button
+                  onClick={() => handleViewAll('Leads')}
+                  className="text-sm text-blue-500 hover:text-blue-600"
+                >
+                  View All
+                </button>
               </div>
             </div>
             <div className="p-6">
@@ -248,19 +295,31 @@ export default function Dashboard() {
             </div>
             <div className="p-6">
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded">
+                <button
+                  onClick={handleNewLead}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded"
+                >
                   <Plus size={16} className="mr-2" />
                   Add New Lead
                 </button>
-                <button className="w-full flex items-center justify-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded">
+                <button
+                  onClick={handleScheduleMeeting}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded"
+                >
                   <Calendar size={16} className="mr-2" />
                   Schedule Meeting
                 </button>
-                <button className="w-full flex items-center justify-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded">
+                <button
+                  onClick={handleUploadDocument}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded"
+                >
                   <FileText size={16} className="mr-2" />
                   Upload Document
                 </button>
-                <button className="w-full flex items-center justify-center px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded">
+                <button
+                  onClick={handleSendFollowUp}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded"
+                >
                   <Mail size={16} className="mr-2" />
                   Send Follow-up
                 </button>
@@ -276,7 +335,12 @@ export default function Dashboard() {
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Upcoming Tasks</h3>
                 <div className="relative">
-                  <button className="text-sm text-blue-500 hover:text-blue-600">View All</button>
+                  <button
+                    onClick={() => handleViewAll('Tasks')}
+                    className="text-sm text-blue-500 hover:text-blue-600"
+                  >
+                    View All
+                  </button>
                   <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full">
                     {stats.tasksDue}
                   </span>
@@ -321,7 +385,12 @@ export default function Dashboard() {
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Commission Alerts</h3>
                 <div className="relative">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <button
+                    onClick={() => handleViewAll('Commissions')}
+                    className="text-sm text-blue-500 hover:text-blue-600"
+                  >
+                    View All
+                  </button>
                   <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full">
                     {stats.urgentAlerts}
                   </span>
